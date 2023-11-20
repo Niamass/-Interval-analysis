@@ -2,22 +2,34 @@ import matplotlib.pyplot as plt
 import numpy as np
 eps = 0.005
 
-#Считывание данных из файла
+#Считывание данных из файла со сдвигом
 def read_data(file):
-    st, fin = [], []
+    list = []
     f = open('.\\adc18ch_experiments\\Bazenov\\'+file)
-    f.readline()
+    line = f.readline()
+    strs = line.split(' ')
+    stop_position = int(strs[-1])
     for line in f:
         strs = line.split('    ')
-        st.append(float(strs[1])-eps)
-        fin.append(float(strs[1])+eps)
+        list.append(float(strs[1]))
     f.close()
+    list = list[len(list) - stop_position:] + list[:len(list) - stop_position]
+    return list, stop_position
+
+#Исправление данных - обынтерваливание и вычитание нуля
+def correct_data(data, zero_data):
+    st, fin = [], []
+    for i in range(len(data)):
+        st.append(data[i]- zero_data[i]-eps)
+        fin.append(data[i]- zero_data[i]+eps)
     return st, fin
 
-#Исправление данных
-def correct_data(st, fin, first, last):
-    st = st[first:last]
-    fin = fin[first:last]
+#Построение выборки
+def get_data(filename):
+    data, sp = read_data(filename)
+    num_of_file = filename[filename.rfind('_') + 1 : filename.find('.')]
+    zero_data, _ = read_data('ZeroLine\\ZeroLine_' + num_of_file +'.txt')
+    st, fin = correct_data(data, zero_data)
     return st, fin
 
 #Оценки выборки
@@ -44,16 +56,17 @@ def mode_mu(st, fin):
     all_int=st + fin
     all_int.sort()
     for i in range(0, 2*N-1):
-        intervals_mu.append([all_int[i], all_int[i+1]])
+        if (all_int[i]!=all_int[i+1]):
+            intervals_mu.append([all_int[i], all_int[i+1]])
     nums=[]
-    for i in range(2*N-1):
+    for i in range(len(intervals_mu)):
         nums.append(0)
         for j in range(N):
             if intervals_mu[i][0]>=st[j] and intervals_mu[i][1]<=fin[j]:
                 nums[i]+=1
     mode=[]
     mu = max(nums)
-    for i in range(2*N-1):
+    for i in range(len(intervals_mu)):
         if(nums[i]==mu):
             mode.append(intervals_mu[i])
     return nums, intervals_mu, mu, mode
@@ -126,12 +139,6 @@ def draw_connect_data(st, fin):
     plt.ylabel('intervals')
     plt.show()
 
-#Построение выборки
-def get_data(file, first, last):
-    st, fin = read_data(file)
-    st, fin = correct_data(st, fin, first, last)
-    return st, fin
-
 #Анализ выборки
 def data_analysis(st, fin, name, color):
     draw(st, fin, name, color)
@@ -171,16 +178,18 @@ def comp_analysis(st1, fin1, st2, fin2 ):
     else:
         st = st1 + [i * R_max for i in fin2]
         fin = fin1 + [i * R_max for i in st2]
+    for i in range(len(JK_list)):
+        if JK_list[i]==JK_max:
+            print(R_list[i])
     draw_connect_data(st, fin)
     draw_R(R_list, JK_list)
-    JK = mera_Jaccard(st, fin)
-    print("JK = ", round(JK, 3))
+    print("JK = ", round(JK_max, 3))
     return R_list, JK_list
 
 
 if __name__ == '__main__':
-    st1, fin1 = get_data('+0_5V\\+0_5V_0.txt', 275, 775)
-    st2, fin2 = get_data('-0_5V\\-0_5V_60.txt', 400, 900)
+    st1, fin1 = get_data('+0_5V\\+0_5V_1.txt')
+    st2, fin2 = get_data('-0_5V\\-0_5V_1.txt')
     data_analysis(st1, fin1, 'X1', 'darkseagreen')
     data_analysis(st2, fin2, 'X2', 'cadetblue')
     comp_analysis(st1, fin1, st2, fin2 )
