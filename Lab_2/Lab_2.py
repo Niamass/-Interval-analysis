@@ -62,11 +62,10 @@ def correct_data(data, zero_data):
 def get_data(num):
     st, fin = [], []
     foldernums =['-0_5V','-0_25V','+0_25V','+0_5V']
+    zero_data = read_data('ZeroLine\\ZeroLine_' + str(num) +'.txt')
     for name in foldernums:
         filename = name +'\\'+ name +'_'+str(num) + '.txt'
         data = read_data(filename)
-        num_of_file = filename[filename.rfind('_') + 1 : filename.find('.')]
-        zero_data = read_data('ZeroLine\\ZeroLine_' + num_of_file +'.txt')
         #zero_data=[0]*len(data)
         y = correct_data(data, zero_data)
         st.append(y[0])
@@ -79,11 +78,11 @@ def left_part(y_st, y_fin, x):
     lp = []
     for i in range(n):
         lp_i = [0] * (n + 2)
-        lp_i[i], lp_i[n], lp_i[n + 1] = - abs(y_fin[i] - y_st[i]), 1, x[i]
+        lp_i[i], lp_i[n], lp_i[n + 1] = - abs(y_fin[i] - y_st[i])/2, 1, x[i]
         lp.append(lp_i)
     for i in range(n):
         lp_i = [0] * (n + 2)
-        lp_i[i], lp_i[n], lp_i[n + 1] = - abs(y_fin[i] - y_st[i]), -1, -x[i]
+        lp_i[i], lp_i[n], lp_i[n + 1] = - abs(y_fin[i] - y_st[i])/2, -1, -x[i]
         lp.append(lp_i)
     return lp
 
