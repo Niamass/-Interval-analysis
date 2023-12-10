@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import linprog
 from shapely.geometry import Polygon
-eps =  450
+eps =  300
 
 #Считывание данных из файла со сдвигом
 def read_data(file, stop_position):
@@ -56,7 +56,6 @@ def get_data(x):
     zero_data = read_data('0.0V_sp'+ str(sp_zero) + '.dat', sp_zero)
     for i in range(len(x)):
         data = read_data(str(x[i]) + 'V_sp' + str(sp[i]) + '.dat', sp[i])
-        #zero_data = [0]*len(data)
         y = correct_data(data, zero_data)
         st.append(y[0])
         fin.append(y[1])
