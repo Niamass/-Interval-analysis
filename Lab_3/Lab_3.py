@@ -56,6 +56,7 @@ def get_data(x):
     zero_data = read_data('0.0V_sp'+ str(sp_zero) + '.dat', sp_zero)
     for i in range(len(x)):
         data = read_data(str(x[i]) + 'V_sp' + str(sp[i]) + '.dat', sp[i])
+        #zero_data = [0]*len(data)
         y = correct_data(data, zero_data)
         st.append(y[0])
         fin.append(y[1])
@@ -166,34 +167,43 @@ def draw_corridor(y_st, y_fin, x, b0, b1, edges):
     plt.show()
     return y_min, y_max
 
-
+#Середина интервала
 def mid(a,b):
     return (a+b)/2
 
+#Радиус интервала
 def rad(a,b):
     return (max(a,b) - min(a,b))/2
 
+#Построение диаграммы статусов
 def draw_status_diagram(y_st, y_fin, y_min, y_max):
     r = []
     l = []
     for i in range(len(y_st)):
         r.append((mid(y_st[i], y_fin[i]) - mid(y_min[i], y_max[i]))/rad(y_st[i], y_fin[i]))
         l.append(rad(y_min[i], y_max[i])/rad(y_st[i], y_fin[i]))
-    r_edge = np.linspace(-3,3,300)
-    plt.plot([1-abs(ri) for ri in r_edge], r_edge, color='deeppink')
-    plt.plot([abs(ri)-1 for ri in r_edge], r_edge, color='deeppink')
+    plt.fill_between((0, 1), (1, 0), (-1, 0), alpha=0.5, label='internal', color = 'lawngreen')
+    plt.fill_between((0, 1), (-1, -2), (-1, 0), alpha=0.5, label='external', color='gold')
+    plt.fill_between((0, 1), (1, 0), (1, 2), alpha=0.5, color='gold')
+    plt.fill_between((1, 2), (-2, -3), (2, 3), alpha=0.5, color='gold')
+    plt.fill_between((0, 2), (1, 3), (3, 3), alpha=0.5, label='outliers', color='crimson')
+    plt.fill_between((0, 2), (-3, -3), (-1, -3), alpha=0.5, color='crimson')
+    r_edge = [-3, 0, 3]
+    plt.plot([1-abs(ri) for ri in r_edge], r_edge, color='k', linewidth = 1)
+    plt.plot([abs(ri)-1 for ri in r_edge], r_edge, color='k', linewidth = 1)
     plt.plot([1, 1], [-3, 3], '--', color='cadetblue')
     plt.plot(l, r, 'o', color = 'darkslateblue')
     for i in range(len(r)):
         plt.annotate(str(i), (l[i]-0.04, r[i]+0.04))
         if(abs(r[i])>=l[i]+1):
-            print('blowout ', i)
+            print('outlier ', i)
         elif(abs(r[i])<1 - l[i]):
-            print('inner ', i)
+            print('internal ', i)
         elif(abs(r[i])==1 - l[i]):
             print('edge ', i)
         elif(abs(r[i])>1 - l[i]):
-            print('outer ', i)
+            print('external ', i)
+    plt.legend()
     plt.xlim(0, 2)
     plt.ylim(-3, 3)
     plt.xlabel('l')
