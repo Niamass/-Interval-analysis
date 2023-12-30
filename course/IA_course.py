@@ -7,13 +7,15 @@ def get_A(file):
     return np.loadtxt(file, delimiter=' ')
 
 #Правая часть ИСЛАУ
-def get_b(n):
+def get_b(n, A):
     b = []
     d = 0.000001
     rnd = 1
     for i in range(n):
+        rnd = sum(A[i]*100)
+        #b.append(Twin(rnd-d, rnd+d, rnd-2*d, rnd+2*d))
         if i == 1:
-             b.append(Twin(rnd-100*d, rnd+100*d,rnd-101*d, rnd+101*d))
+             b.append(Twin(rnd-30*d, rnd + 30*d, rnd-31*d, rnd+31*d))
         else:
             b.append(Twin(rnd-d, rnd+d, rnd-2*d, rnd+2*d))
     return b
@@ -97,7 +99,7 @@ def eigenvalues_analysis(A):
 
 if __name__ == '__main__':
     A = get_A("matrix.txt")
-    b = get_b(len(A))
+    b = get_b(len(A), A)
 
     #Точечное решение
     x_in, x_out = points_solution(A, b)
